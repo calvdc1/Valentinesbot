@@ -20,17 +20,25 @@ if (fs.existsSync(commandsPath)) {
 }
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+const targetGuildId = process.env.GUILD_ID;
 
 (async () => {
     try {
-        console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
-        await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
-            { body: commands },
-        );
-
-        console.log('Successfully reloaded application (/) commands.');
+        if (targetGuildId) {
+            console.log(`Refreshing ${commands.length} guild (/) commands for guild ${targetGuildId}.`);
+            await rest.put(
+                Routes.applicationGuildCommands(process.env.CLIENT_ID, targetGuildId),
+                { body: commands },
+            );
+            console.log('Successfully reloaded guild (/) commands.');
+        } else {
+            console.log(`Refreshing ${commands.length} global application (/) commands.`);
+            await rest.put(
+                Routes.applicationCommands(process.env.CLIENT_ID),
+                { body: commands },
+            );
+            console.log('Successfully reloaded global application (/) commands.');
+        }
     } catch (error) {
         console.error(error);
     }
